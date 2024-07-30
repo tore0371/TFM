@@ -2,11 +2,6 @@ import requests
 import mysql.connector
 from bs4 import BeautifulSoup
 
-
-#################################################
-# Faltan las imganes para completatar el script #
-#################################################
-
 # Configuración de la base de datos
 config = {
     'user': 'salva',
@@ -25,7 +20,11 @@ print("\n")
 
 
 # URL de la página web
-url = 'https://www.compraonline.bonpreuesclat.cat/products/search?q=Queso'
+url = 'https://www.hipercor.es/supermercado/buscar/?term=queso&search=text'
+
+###############################################
+# NO PERMITE HACER PETICIONES GET A LA PÁGINA #
+###############################################
 
 # Realizar la solicitud GET a la página web
 response = requests.get(url)
@@ -36,14 +35,14 @@ else:
     soup = BeautifulSoup(response.text, 'html.parser')
     
     # Encontrar todos los productos en la página
-    products = soup.find_all('div', class_='_box_12ac1_1 _box--shadow_12ac1_15 salt-p--0')
+    products = soup.find_all('div', class_='grid-item   product_tile _retro _hipercor  dataholder js-product')
     
     # Lista para almacenar la información de los productos
     product_list = []
 
     for product in products:
         # Extraer el nombre del producto
-        name_tag = product.find('a', class_='link__Link-sc-14ymsi2-0 iuoeFt link__Link-sc-14ymsi2-0 base__Title-sc-1mnb0pd-27 base__FixedHeightTitle-sc-1mnb0pd-43 iuoeFt ifdXVr cCRJZx')
+        name_tag = product.find('a', class_='link event js-product-link')
         name = name_tag.text.strip() if name_tag else 'N/A'
    
         # Extraer el precio del producto
