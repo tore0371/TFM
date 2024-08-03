@@ -2,8 +2,9 @@ import requests
 import mysql.connector
 from bs4 import BeautifulSoup
 
+
 #################################################
-# Faltan las imganes para completatar el script #
+# #
 #################################################
 
 # Configuración de la base de datos
@@ -24,7 +25,7 @@ print("\n")
 
 
 # URL de la página web
-url = 'https://www.compraonline.alcampo.es/categories/frescos/quesos/OCQuesos'
+url = 'https://tienda.consum.es/es/s/queso%20?orderById=13&page=1'
 
 # Realizar la solicitud GET a la página web
 response = requests.get(url)
@@ -35,26 +36,26 @@ else:
     soup = BeautifulSoup(response.text, 'html.parser')
     
     # Encontrar todos los productos en la página
-    products = soup.find_all('div', class_='product-card-container')
+    products = soup.find_all('div', class_='widget-prod d-flex flex-column align-items-center ng-tns-c232-10 widget-prod__not_highlighted ng-star-inserted')
     
     # Lista para almacenar la información de los productos
     product_list = []
 
     for product in products:
         # Extraer el nombre del producto
-        name_tag = product.find('h3', class_='_text_f6lbl_1 _text--m_f6lbl_23')
+        name_tag = product.find('a', class_='u-no-link ng-tns-c232-8 ng-star-inserted')
         name = name_tag.text.strip() if name_tag else 'N/A'
    
         # Extraer el precio del producto
-        price_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 sc-1fkdssq-0 eVdlkb')
+        price_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 utils__PriceText-sc-1fkdssq-0 ifeOmJ')
         price = price_tag.text.strip() if price_tag else 'N/A'
 
         # Extraer el peso del producto
-        weight_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 sc-1sjeki5-0 bUHwDh')
+        weight_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 weight__SingleTextLine-sc-1sjeki5-0 dsXNJd')
         weight = weight_tag.text.strip() if weight_tag else 'N/A'
 
         # Extraer el precio por kilo del producto
-        price_per_kilo_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 sc-1vpsrpe-2 sc-bnzhts-0 eySopN jIzHwa')
+        price_per_kilo_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 standard-promotion__PromotionIntentText-sc-1vpsrpe-2 price-per-unit__TruncatedText-sc-bnzhts-0 jVJmKC jsvUEM')
         price_per_kilo = price_per_kilo_tag.text.strip() if price_per_kilo_tag else 'N/A'
         
         # Extraer la URL de la imagen del producto

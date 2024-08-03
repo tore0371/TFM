@@ -31,6 +31,7 @@ response = requests.get(url)
 if response.status_code != 200:
     print(f"Error al acceder a la página: {response.status_code}")
 else:
+    print("Entre")
     # Analizar el contenido HTML de la página web
     soup = BeautifulSoup(response.text, 'html.parser')
     

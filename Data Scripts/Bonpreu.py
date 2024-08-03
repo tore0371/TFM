@@ -36,31 +36,31 @@ else:
     soup = BeautifulSoup(response.text, 'html.parser')
     
     # Encontrar todos los productos en la página
-    products = soup.find_all('div', class_='_box_12ac1_1 _box--shadow_12ac1_15 salt-p--0')
+    products = soup.find_all('div', class_='product-card-container')
     
     # Lista para almacenar la información de los productos
     product_list = []
 
     for product in products:
         # Extraer el nombre del producto
-        name_tag = product.find('a', class_='link__Link-sc-14ymsi2-0 iuoeFt link__Link-sc-14ymsi2-0 base__Title-sc-1mnb0pd-27 base__FixedHeightTitle-sc-1mnb0pd-43 iuoeFt ifdXVr cCRJZx')
+        name_tag = product.find('h3', class_='_text_f6lbl_1 _text--m_f6lbl_23')
         name = name_tag.text.strip() if name_tag else 'N/A'
    
         # Extraer el precio del producto
-        price_tag = product.find('strong', class_='base__Price-sc-1mnb0pd-29 sc-ieebsP iDLLj eyJUgq')
+        price_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 utils__PriceText-sc-1fkdssq-0 ifeOmJ')
         price = price_tag.text.strip() if price_tag else 'N/A'
 
         # Extraer el peso del producto
-        weight_tag = product.find('span', class_='text__Text-sc-6l1yjp-0 base__SizeText-sc-1mnb0pd-38 fop__SizeText-sc-sgv9y1-4 bhymDA iImbUZ jrvLpU')
+        weight_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 weight__SingleTextLine-sc-1sjeki5-0 dsXNJd')
         weight = weight_tag.text.strip() if weight_tag else 'N/A'
 
         # Extraer el precio por kilo del producto
-        price_per_kilo_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 standard-promotion__PromotionIntentText-sc-1vpsrpe-2 fop__PricePerText-sc-sgv9y1-5 jVJmKC eNYENy')
+        price_per_kilo_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 standard-promotion__PromotionIntentText-sc-1vpsrpe-2 price-per-unit__TruncatedText-sc-bnzhts-0 jVJmKC jsvUEM')
         price_per_kilo = price_per_kilo_tag.text.strip() if price_per_kilo_tag else 'N/A'
         
         # Extraer la URL de la imagen del producto
-        image_tag = product.find('img', class_='fop__Image-sc-sgv9y1-2 daCdrp')
-        image_url = image_tag['src'] if image_tag else 'N/A'
+        image_tag = product.find('img', class_='image__StyledLazyLoadImage-sc-wislgi-0 foQxui')
+        image_url = image_tag['srcset'] if image_tag else 'N/A'
 
         product_info = {
             'name': name,
