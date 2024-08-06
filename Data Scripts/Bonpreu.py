@@ -1,11 +1,11 @@
 import requests
 import mysql.connector
 from bs4 import BeautifulSoup
+import re
 
+# Script completado, falta imágenes
+# Datos insertados en la BASE DE DATOS
 
-#################################################
-# Faltan las imganes para completatar el script #
-#################################################
 
 # Configuración de la base de datos
 config = {
@@ -15,14 +15,21 @@ config = {
     'database': 'tfm'
 }
 
-# Conexion a la base de datos
+# Conexión a la base de datos
 conn = mysql.connector.connect(**config)
 cursor = conn.cursor()
 
-print("\n")
-print("Conexión a la base de datos realizada con exito")
-print("\n")
+print("\nConexión a la base de datos realizada con éxito\n")
 
+# Inserta el supermercado "Bon Preu" en la zona "Barcelona"
+insert_supermarket_query = """
+INSERT INTO supermarket (Name, Zone) VALUES (%s, %s)
+"""
+supermarket_data = ("Bon Preu", "Barcelona")
+cursor.execute(insert_supermarket_query, supermarket_data)
+
+# Obtiene el ID del supermercado insertado
+supermarket_id = cursor.lastrowid
 
 # URL de la página web
 url = 'https://www.compraonline.bonpreuesclat.cat/products/search?q=Queso'
@@ -47,35 +54,60 @@ else:
         name = name_tag.text.strip() if name_tag else 'N/A'
    
         # Extraer el precio del producto
-        price_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 utils__PriceText-sc-1fkdssq-0 ifeOmJ')
+        price_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 sc-1fkdssq-0 eVdlkb')
         price = price_tag.text.strip() if price_tag else 'N/A'
 
         # Extraer el peso del producto
-        weight_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 weight__SingleTextLine-sc-1sjeki5-0 dsXNJd')
+        weight_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 sc-1sjeki5-0 bUHwDh')
         weight = weight_tag.text.strip() if weight_tag else 'N/A'
 
         # Extraer el precio por kilo del producto
-        price_per_kilo_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 standard-promotion__PromotionIntentText-sc-1vpsrpe-2 price-per-unit__TruncatedText-sc-bnzhts-0 jVJmKC jsvUEM')
+        price_per_kilo_tag = product.find('span', class_='_text_f6lbl_1 _text--m_f6lbl_23 sc-1vpsrpe-2 sc-bnzhts-0 exvQSw jIzHwa')
         price_per_kilo = price_per_kilo_tag.text.strip() if price_per_kilo_tag else 'N/A'
         
         # Extraer la URL de la imagen del producto
         image_tag = product.find('img', class_='image__StyledLazyLoadImage-sc-wislgi-0 foQxui')
         image_url = image_tag['srcset'] if image_tag else 'N/A'
 
+        # Limpiar los datos extraídos
+        price_value = float(price.replace('€', '').replace(',', '.').strip()) if price != 'N/A' else 0.0
+        weight_value = float(weight.replace('kg', '').replace(',', '.').strip()) if weight != 'N/A' else 0.0
+        price_per_kilo_clean = re.sub(r'[^\d.,]', '', price_per_kilo.replace(',', '.')).strip()
+        kg_price_value = float(price_per_kilo_clean) if price_per_kilo_clean else 0.0
+
         product_info = {
             'name': name,
-            'price': price,
-            'weight': weight,
-            'price_per_kilo': price_per_kilo,
+            'price': price_value,
+            'weight': weight_value,
+            'price_per_kilo': kg_price_value,
             'image_url': image_url
         }
         product_list.append(product_info)
 
+    # Inserta datos en la tabla supermarket_data
+    insert_product_query = """
+    INSERT INTO supermarket_data (SupermarketID, ProductName, Price, Weight, KGPrice, ImageURL) 
+    VALUES (%s, %s, %s, %s, %s, %s)
+    """
+
+    for product in product_list:
+        product_data = (supermarket_id, product['name'], product['price'], product['weight'], product['price_per_kilo'], product['image_url'])
+        cursor.execute(insert_product_query, product_data)
+
+    # Confirma las inserciones
+    conn.commit()
+
     # Mostrar la información de los productos
     for product in product_list:
         print(f"Nombre: {product['name']}")
-        print(f"Precio: {product['price']}")
-        print(f"Peso: {product['weight']}")
-        print(f"Precio por kilo: {product['price_per_kilo']}")
+        print(f"Precio: {product['price']} €")
+        print(f"Peso: {product['weight']} kg")
+        print(f"Precio por kilo: ({product['price_per_kilo']} € per quilo)")
         print(f"URL de la imagen: {product['image_url']}")
         print('-' * 30)
+
+# Cierra la conexión
+cursor.close()
+conn.close()
+
+print("Datos insertados correctamente.")

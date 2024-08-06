@@ -17,3 +17,5 @@ CREATE TABLE supermarket_data (
     ImageURL VARCHAR(255),
     FOREIGN KEY (SupermarketID) REFERENCES supermarket(SupermarketID)
 );
+
+ALTER TABLE supermarket_data MODIFY ProductName VARCHAR(255);
